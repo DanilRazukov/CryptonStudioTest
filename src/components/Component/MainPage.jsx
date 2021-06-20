@@ -1,6 +1,7 @@
 import React from 'react'
 import API from '../../../API';
 import CharacterCard from '../Base/CharacterCard.jsx';
+import Pagination from '../Base/Pagination.jsx';
 
 export default class MainPage extends React.Component
 {
@@ -10,7 +11,8 @@ export default class MainPage extends React.Component
     this.state = {
       data: [],
       renderData: [],
-      pagination: 0,
+      pagination: 1,
+      countPag: 0,
       numberPage: 1,
     }
   }
@@ -23,7 +25,6 @@ export default class MainPage extends React.Component
 
 
     console.log(response)
-
     this.state.renderData = await this.processingData(response.data);
 
     console.log(this.state.renderData)
@@ -51,7 +52,7 @@ export default class MainPage extends React.Component
       {
         if (data.results[i].planetName) return
         const planet = await this.getData(data.results[i].homeworld);
-        debugger
+
         data.results[i].planetName = planet.data.name;
       }
 
@@ -80,11 +81,40 @@ export default class MainPage extends React.Component
         })
       })
     }
+
+    const count = data.count;
+
+    this.state.countPag = count;
+
+    const countPagin = Math.ceil(count / 10)
+
+    const arrPag = [];
+
+    for (let i = 0; i < countPagin; i++)
+    {
+
+      arrPag.push({
+        index: i + 1,
+        classPag: ("number" + ((this.state.pagination == i + 1) ? " active" : " "))
+      })
+    }
+
+    curData.push({
+      Component: Pagination,
+      data: arrPag,
+      classPagination: "pagination-line",
+      onClick: this.changePagination
+    })
     return curData
   }
 
 
   likeCard = (data) =>
+  {
+    return
+  }
+
+  changePagination = (number) =>
   {
     return
   }
@@ -112,6 +142,7 @@ export default class MainPage extends React.Component
             classHome={item.classHome}
             className={item.className}
             classImg={item.classImg}
+            classPagination={item.classPagination}
             classButton={item.classButton}
             onClick={item.onClick}
           />)}
