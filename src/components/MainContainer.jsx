@@ -1,6 +1,7 @@
 import React from 'react'
-import MainPage from './MainPage.jsx';
-
+import MainPage from './Component/MainPage.jsx';
+import NavBar from './Component/NavBar.jsx';
+import Header from './Component/Header.jsx';
 export default class MainContainer extends React.Component
 {
   constructor(props)
@@ -14,9 +15,11 @@ export default class MainContainer extends React.Component
   render()
   {
     return (
-      <>
+      <div className="app">
+        <NavBar />
         <MainPage />
-      </>
+        <Header />
+      </div>
     )
   }
 }
