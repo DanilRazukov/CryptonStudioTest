@@ -1,4 +1,5 @@
 import React from 'react'
+import {NavLink} from 'react-router-dom';
 
 export default class NavBar extends React.Component
 {
@@ -14,12 +15,8 @@ export default class NavBar extends React.Component
   {
     return (
       <div className="nav">
-        <a className="main-page" href="#" onClick={(ev) => {ev.preventDefault(); return }}>
-          Main Page
-        </a>
-        <a className="favorites-page" href="#" onClick={(ev) => {ev.preventDefault(); return }}>
-          Favorite characters
-        </a>
+        <NavLink to="/">Main Page</NavLink>
+        <NavLink to="/favorites">Favorite characters</NavLink>
       </div>
     )
   }

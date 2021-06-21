@@ -15,7 +15,7 @@ export default class CharacterCard extends React.Component
     } = this.props
 
 
-
+    debugger
     return (
       <div className={classCard}>
         <img src={data.src} className={classImg} />

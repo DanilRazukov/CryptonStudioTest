@@ -9,8 +9,6 @@ import * as constants from "../constants"
 let delay = 0
 export default class MainPage extends React.Component
 {
-
-
   constructor(props)
   {
     super(props);
@@ -65,6 +63,12 @@ export default class MainPage extends React.Component
     {
       if (i == 1)
       {
+        for (let i = 0; i < response.data.results.length; i++)
+        {
+          const planet = await this.getData(response.data.results[i].homeworld);
+
+          response.data.results[i].planetName = planet.data.name;
+        }
         response.data.results.forEach((item, index) =>
         {
           item.id = index + 1;
@@ -77,6 +81,12 @@ export default class MainPage extends React.Component
       {
         const url = "https://swapi.dev/api/people/?page=" + i
         const newResp = await this.getData(url);
+        for (let i = 0; i < newResp.data.results.length; i++)
+        {
+          const planet = await this.getData(newResp.data.results[i].homeworld);
+
+          newResp.data.results[i].planetName = planet.data.name;
+        }
         newResp.data.results.forEach((item, index) =>
         {
           item.id = (i - 1) * 10 + index + 1;
@@ -90,7 +100,7 @@ export default class MainPage extends React.Component
     const slicePage = {};
 
     const favorites = await axios.get('http://localhost:3001/Favorites/')
-    debugger
+
     if (favorites.data.length)
     {
       this.state.favorites = favorites.data
@@ -99,7 +109,7 @@ export default class MainPage extends React.Component
     slicePage.results = dataArr.slice(0, 10);
     slicePage.count = count;
 
-    this.state.renderData = await this.processingData(slicePage);
+    this.state.renderData = this.processingData(slicePage);
 
     this.forceUpdate();
   }
@@ -112,25 +122,17 @@ export default class MainPage extends React.Component
     return data
   }
 
-  processingData = async (data) => 
+  processingData = (data) => 
   {
 
     const curData = [];
 
     if ("results" in data)
     {
-      for (let i = 0; i < data.results.length; i++)
-      {
-        const planet = await this.getData(data.results[i].homeworld);
-
-        data.results[i].planetName = planet.data.name;
-      }
-
       data.results.forEach(item =>
       {
-        const arr = item.url.split("/"); ////?????
 
-        const id = arr[arr.length - 2]
+        const id = item.id
         console.log(id)
         const newData = {
           name: item.name,
@@ -143,7 +145,7 @@ export default class MainPage extends React.Component
         {
           if (elem.id == item.id)
           {
-            debugger
+
             classButton += " like"
             item.favorite = 1;
           }
@@ -189,7 +191,6 @@ export default class MainPage extends React.Component
   likeCard = async (data) =>
   {
     const id = data.id;
-
 
     const curObj = {};
     let item;
@@ -244,7 +245,7 @@ export default class MainPage extends React.Component
     }
 
 
-    this.state.renderData = await this.processingData(curObj)
+    this.state.renderData = this.processingData(curObj)
 
     this.forceUpdate();
 
@@ -271,7 +272,7 @@ export default class MainPage extends React.Component
 
     this.state.pagination = num;
 
-    this.state.renderData = await this.processingData(slicePage)
+    this.state.renderData = this.processingData(slicePage)
 
     this.forceUpdate();
   }
@@ -324,7 +325,7 @@ export default class MainPage extends React.Component
 
 
 
-      this.state.renderData = await this.processingData(processObj)
+      this.state.renderData = this.processingData(processObj)
 
       await this.forceUpdateSync();
     }, 500, constants.delayIndex.search)
@@ -361,7 +362,6 @@ export default class MainPage extends React.Component
             classImg={item.classImg}
             classPagination={item.classPagination}
             classButton={item.classButton}
-            onClick={item.onClick}
           />)}
       </div>
     )
