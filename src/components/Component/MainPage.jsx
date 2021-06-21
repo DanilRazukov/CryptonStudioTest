@@ -1,9 +1,14 @@
 import React from 'react'
 import API from '../../../API';
 import axios from 'axios';
+
+import MainContainer from '../MainContainer.jsx';
+
 import CharacterCard from '../Base/CharacterCard.jsx';
 import Input from '../Base/Input.jsx';
 import Pagination from '../Base/Pagination.jsx';
+import Header from '../Base/Header.jsx';
+
 import * as constants from "../constants"
 
 let delay = 0
@@ -13,6 +18,7 @@ export default class MainPage extends React.Component
   {
     super(props);
     this.state = {
+      view: constants.view.loader,
       data: [],
       renderData: [],
       pagination: 1,
@@ -45,54 +51,96 @@ export default class MainPage extends React.Component
 
   async componentDidMount()
   {
-    const url = "https://swapi.dev/api/people"
-    const response = await this.getData(url);
-
-
-    const count = response.data.count;
-
-    this.state.allCount = count;
-
-    this.state.count = count;
-
-    const countPagin = Math.ceil(count / 10)
-
     const dataArr = [];
 
-    for (let i = 1; i <= countPagin; i++)
+    let count
+
+    if (!MainContainer.this.state.data.length)
     {
-      if (i == 1)
-      {
-        for (let i = 0; i < response.data.results.length; i++)
-        {
-          const planet = await this.getData(response.data.results[i].homeworld);
+      const url = "https://swapi.dev/api/people"
+      const response = await this.getData(url);
 
-          response.data.results[i].planetName = planet.data.name;
-        }
-        response.data.results.forEach((item, index) =>
+      if (!response)
+      {
+        this.state.view = constants.view.none;
+        this.forceUpdate();
+        return
+      }
+
+
+      count = response.data.count;
+
+      this.state.allCount = count;
+
+      this.state.count = count;
+
+      const countPagin = Math.ceil(count / 10)
+
+      for (let i = 1; i <= countPagin; i++)
+      {
+        if (i == 1)
         {
-          item.id = index + 1;
-          dataArr.push({
-            ...item
+          for (let i = 0; i < response.data.results.length; i++)
+          {
+            const planet = await this.getData(response.data.results[i].homeworld);
+
+            if (!planet)
+            {
+              this.state.view = constants.view.none;
+              this.forceUpdate();
+              return
+            }
+
+            response.data.results[i].planetName = planet.data.name;
+          }
+          response.data.results.forEach((item, index) =>
+          {
+            item.id = index + 1;
+            dataArr.push({
+              ...item
+            })
           })
-        })
-      }
-      else
-      {
-        const url = "https://swapi.dev/api/people/?page=" + i
-        const newResp = await this.getData(url);
-        for (let i = 0; i < newResp.data.results.length; i++)
-        {
-          const planet = await this.getData(newResp.data.results[i].homeworld);
-
-          newResp.data.results[i].planetName = planet.data.name;
         }
-        newResp.data.results.forEach((item, index) =>
+        else
         {
-          item.id = (i - 1) * 10 + index + 1;
-          dataArr.push({...item})
-        })
+          const url = "https://swapi.dev/api/people/?page=" + i
+          const newResp = await this.getData(url);
+
+          if (!newResp)
+          {
+            this.state.view = constants.view.none;
+            this.forceUpdate();
+            return
+          }
+          for (let i = 0; i < newResp.data.results.length; i++)
+          {
+            const planet = await this.getData(newResp.data.results[i].homeworld);
+
+            newResp.data.results[i].planetName = planet.data.name;
+          }
+          newResp.data.results.forEach((item, index) =>
+          {
+            item.id = (i - 1) * 10 + index + 1;
+            dataArr.push({...item})
+          })
+        }
       }
+
+      MainContainer.this.saveData(dataArr)
+
+    }
+    else
+    {
+      MainContainer.this.state.data.forEach(item =>
+      {
+        dataArr.push({
+          ...item
+        })
+      })
+
+      this.state.allCount = count;
+
+      this.state.count = count;
     }
 
     this.state.data = dataArr;
@@ -111,6 +159,8 @@ export default class MainPage extends React.Component
 
     this.state.renderData = this.processingData(slicePage);
 
+    this.state.view = constants.view.content;
+
     this.forceUpdate();
   }
 
@@ -127,13 +177,20 @@ export default class MainPage extends React.Component
 
     const curData = [];
 
+    curData.push({
+      Component: Header,
+      data: {
+        header: "All characters"
+      }
+    })
+
     if ("results" in data)
     {
       data.results.forEach(item =>
       {
 
         const id = item.id
-        console.log(id)
+
         const newData = {
           name: item.name,
           homewWorld: item.planetName,
@@ -338,31 +395,42 @@ export default class MainPage extends React.Component
     const {
       renderData,
       inputValue,
+      view
     } = this.state;
 
 
 
     return (
       <div className="main">
-        <div className="input">
-          <Input
-            value={inputValue}
-            onChange={this.onChangeInput}
-          />
-        </div>
-        {renderData.map((item, index) =>
-          <item.Component
-            key={index}
-            data={item.data}
-            onClick={item.onClick}
-            classButton={item.classButton}
-            classCard={item.classCard}
-            classHome={item.classHome}
-            className={item.className}
-            classImg={item.classImg}
-            classPagination={item.classPagination}
-            classButton={item.classButton}
-          />)}
+        {
+          view == constants.view.content ?
+            <>
+              <div className="input">
+                <Input
+                  value={inputValue}
+                  onChange={this.onChangeInput}
+                />
+              </div>
+              {renderData.map((item, index) =>
+                <item.Component
+                  key={index}
+                  data={item.data}
+                  onClick={item.onClick}
+                  classButton={item.classButton}
+                  classCard={item.classCard}
+                  classHome={item.classHome}
+                  className={item.className}
+                  classImg={item.classImg}
+                  classPagination={item.classPagination}
+                  classButton={item.classButton}
+                />)}
+            </>
+            : view == constants.view.loader ?
+              <div className="loader-ring-m">
+                <div /><div /><div />
+              </div>
+              : null
+        }
       </div>
     )
   }

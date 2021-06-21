@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import CharacterCard from '../Base/CharacterCard.jsx';
 import Pagination from '../Base/Pagination.jsx';
+import Header from '../Base/Header.jsx';
 
 export default class FavoritesPage extends React.Component
 {
@@ -12,7 +13,10 @@ export default class FavoritesPage extends React.Component
     super(props);
     this.state = {
       data: [],
-      renderData: []
+      renderData: [],
+      pagination: 1,
+      allCount: 0,
+      count: 0,
     }
   }
 
@@ -20,12 +24,14 @@ export default class FavoritesPage extends React.Component
   {
     const favorites = await axios.get('http://localhost:3001/Favorites/')
 
-    debugger
+
 
     if (favorites.data.length)
     {
       this.state.data = favorites.data
     }
+
+    this.state.count = this.state.data.length
 
     this.state.renderData = this.processingData(favorites.data);
 
@@ -35,6 +41,13 @@ export default class FavoritesPage extends React.Component
   processingData = (data) =>
   {
     const curData = [];
+
+    curData.push({
+      Component: Header,
+      data: {
+        header: "My favorite characters"
+      }
+    })
 
     if (data.length)
     {
@@ -58,7 +71,7 @@ export default class FavoritesPage extends React.Component
         })
       })
 
-      const count = data.length;
+      const count = this.state.count;
 
       const countPagin = Math.ceil(count / 10);
 
@@ -83,14 +96,42 @@ export default class FavoritesPage extends React.Component
     return curData
   }
 
-  likeClick = (id) => 
+  likeClick = async (data) => 
   {
-    return
+    const id = data.id;
+
+    await axios.delete(`http://localhost:3001/Favorites/${ id }`);
+    const index = this.state.data.findIndex(item => item.id == id);
+    this.state.data.splice(index, 1);
+
+    this.state.count = this.state.data.length;
+
+    let dataArr = this.state.data.slice((this.state.pagination - 1) * 10, this.state.pagination * 10)
+
+    if (!dataArr.length)
+    {
+      dataArr = this.state.data.slice((this.state.pagination - 2) * 10, (this.state.pagination - 1) * 10)
+      --this.state.pagination
+    }
+
+    this.state.renderData = this.processingData(dataArr)
+    this.forceUpdate();
   }
 
   changePagination = (num) =>
   {
-    return
+    const {
+      data,
+    } = this.state;
+
+
+    const dataArr = data.slice((num - 1) * 10, num * 10)
+
+    this.state.pagination = num;
+
+    this.state.renderData = this.processingData(dataArr)
+
+    this.forceUpdate();
   }
 
   render()

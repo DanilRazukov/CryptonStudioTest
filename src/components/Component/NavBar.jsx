@@ -15,8 +15,8 @@ export default class NavBar extends React.Component
   {
     return (
       <div className="nav">
-        <NavLink to="/">Main Page</NavLink>
-        <NavLink to="/favorites">Favorite characters</NavLink>
+        <NavLink exact to="/" activeStyle={{backgroundColor: "#35D3A7"}}>Main Page</NavLink>
+        <NavLink to="/favorites" activeStyle={{backgroundColor: "#35D3A7"}}>Favorite characters</NavLink>
       </div>
     )
   }

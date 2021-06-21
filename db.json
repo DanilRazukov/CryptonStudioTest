@@ -2,24 +2,19 @@
   "Favorites": [
     {},
     {
-      "name": "Obi-Wan Kenobi",
-      "id": 10,
-      "homeWorld": "https://swapi.dev/api/planets/20/"
-    },
-    {
       "name": "Beru Whitesun lars",
       "id": 7,
       "homeWorld": "https://swapi.dev/api/planets/1/"
     },
     {
-      "name": "Chewbacca",
-      "id": 13,
-      "homeWorld": "https://swapi.dev/api/planets/14/"
+      "name": "Luke Skywalker",
+      "id": 1,
+      "homeWorld": "https://swapi.dev/api/planets/1/"
     },
     {
-      "name": "C-3PO",
-      "id": 2,
-      "homeWorld": "https://swapi.dev/api/planets/1/"
+      "name": "Obi-Wan Kenobi",
+      "id": 10,
+      "homeWorld": "https://swapi.dev/api/planets/20/"
     },
     {
       "name": "Owen Lars",
@@ -27,9 +22,29 @@
       "homeWorld": "https://swapi.dev/api/planets/1/"
     },
     {
-      "name": "R5-D4",
-      "id": 8,
+      "name": "C-3PO",
+      "id": 2,
       "homeWorld": "https://swapi.dev/api/planets/1/"
+    },
+    {
+      "name": "Darth Vader",
+      "id": 4,
+      "homeWorld": "https://swapi.dev/api/planets/1/"
+    },
+    {
+      "name": "Jabba Desilijic Tiure",
+      "id": 16,
+      "homeWorld": "https://swapi.dev/api/planets/24/"
+    },
+    {
+      "name": "Greedo",
+      "id": 15,
+      "homeWorld": "https://swapi.dev/api/planets/23/"
+    },
+    {
+      "name": "Yoda",
+      "id": 19,
+      "homeWorld": "https://swapi.dev/api/planets/28/"
     }
   ]
 }
