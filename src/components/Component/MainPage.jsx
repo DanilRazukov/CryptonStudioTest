@@ -93,7 +93,7 @@ export default class MainPage extends React.Component
     debugger
     if (favorites.data.length)
     {
-      this.state.favorites = favorites
+      this.state.favorites = favorites.data
     }
 
     slicePage.results = dataArr.slice(0, 10);
@@ -138,7 +138,16 @@ export default class MainPage extends React.Component
           src: `https://starwars-visualguide.com/assets/img/characters/${ id }.jpg`,
           id
         }
-        const classButton = "like-button"
+        let classButton = "like-button";
+        this.state.favorites.forEach(elem =>
+        {
+          if (elem.id == item.id)
+          {
+            debugger
+            classButton += " like"
+            item.favorite = 1;
+          }
+        })
         curData.push({
           Component: CharacterCard,
           classCard: "card",
@@ -167,8 +176,6 @@ export default class MainPage extends React.Component
       })
     }
 
-
-
     curData.push({
       Component: Pagination,
       data: arrPag,
@@ -179,9 +186,67 @@ export default class MainPage extends React.Component
   }
 
 
-  likeCard = (data) =>
+  likeCard = async (data) =>
   {
-    return
+    const id = data.id;
+
+
+    const curObj = {};
+    let item;
+    let favorite;
+    let num;
+    let index;
+
+    if (!this.state.searchData.length)
+    {
+      index = this.state.data.findIndex(item => item.id == id)
+
+      favorite = this.state.data[index].favorite;
+      item = this.state.data[index];
+
+      this.state.data[index].favorite = !favorite
+
+      num = this.state.pagination;
+      curObj.results = this.state.data.slice((num - 1) * 10, num * 10);
+      curObj.count = this.state.count;
+      item = this.state.data[index];
+    }
+    else
+    {
+      index = this.state.searchData.findIndex(item => item.id == id)
+
+      favorite = this.state.searchData[index].favorite;
+      item = this.state.searchData[index];
+
+      this.state.searchData[index].favorite = !favorite
+
+      num = this.state.pagination;
+      curObj.results = this.state.searchData.slice((num - 1) * 10, num * 10);
+      curObj.count = this.state.count;
+      item = this.state.searchData[index];
+    }
+
+    if (!favorite)
+    {
+      await axios.post('http://localhost:3001/Favorites/', {
+        "name": item.name,
+        "id": item.id,
+        "homeWorld": item.homeworld,
+      })
+
+      this.state.favorites.push({...item})
+    }
+    if (favorite)
+    {
+      await axios.delete(`http://localhost:3001/Favorites/${ item.id }`)
+      const index = this.state.favorites.findIndex(elem => elem.id == item.id)
+      this.state.favorites.splice(index, 1)
+    }
+
+
+    this.state.renderData = await this.processingData(curObj)
+
+    this.forceUpdate();
 
   }
 

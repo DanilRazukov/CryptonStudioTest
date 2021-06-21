@@ -1,3 +1,30 @@
 {
-  "Favorites": [{}]
+  "Favorites": [
+    {},
+    {
+      "name": "R2-D2",
+      "id": 3,
+      "homeWorld": "https://swapi.dev/api/planets/8/"
+    },
+    {
+      "name": "C-3PO",
+      "id": 2,
+      "homeWorld": "https://swapi.dev/api/planets/1/"
+    },
+    {
+      "name": "Obi-Wan Kenobi",
+      "id": 10,
+      "homeWorld": "https://swapi.dev/api/planets/20/"
+    },
+    {
+      "name": "Beru Whitesun lars",
+      "id": 7,
+      "homeWorld": "https://swapi.dev/api/planets/1/"
+    },
+    {
+      "name": "Chewbacca",
+      "id": 13,
+      "homeWorld": "https://swapi.dev/api/planets/14/"
+    }
+  ]
 }
