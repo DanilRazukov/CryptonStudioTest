@@ -15,15 +15,21 @@ export default class Pagination extends React.Component
       <div className={classPagination}>
         {
           data.map((item, index) =>
-            <button
-              key={index}
-              className={item.classPag}
-              onClick={(ev) =>
-              {
-                ev.stopPropagation();
-                this.props.onClick(data.index)
-              }}
-            >{item.index}</button>)
+            <div key={index} className="pagination">
+              <button
+                className={item.classPag}
+                onClick={(ev) =>
+                {
+                  ev.stopPropagation();
+                  this.props.onClick(item.index)
+                }}
+              >
+                <div className="num">
+                  {item.index}
+                </div>
+              </button>
+            </div>
+          )
         }
       </div>
     )

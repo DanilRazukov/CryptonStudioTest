@@ -1,10 +1,15 @@
 import React from 'react'
 import API from '../../../API';
 import CharacterCard from '../Base/CharacterCard.jsx';
+import Input from '../Base/Input.jsx';
 import Pagination from '../Base/Pagination.jsx';
+import * as constants from "../constants"
 
+let delay = 0
 export default class MainPage extends React.Component
 {
+
+
   constructor(props)
   {
     super(props);
@@ -12,22 +17,36 @@ export default class MainPage extends React.Component
       data: [],
       renderData: [],
       pagination: 1,
-      countPag: 0,
+      countPage: 0,
       numberPage: 1,
+      inputValue: "",
+      lastUrl: "https://swapi.dev/api/people/?page%3A1=&"
     }
+
+  }
+
+  setDelay = (f, t) =>
+  {
+
+    clearTimeout(delay);
+    delay = setTimeout(f, t);
+  }
+
+  forceUpdateSync = async () =>
+  {
+    await new Promise((resolve, reject) =>
+    {
+      this.forceUpdate(() => {resolve()});
+    });
   }
 
 
   async componentDidMount()
   {
-    const url = "https://swapi.dev/api/people/?page:1"
+    const url = "https://swapi.dev/api/people/?page%3A1=&page=1"
     const response = await this.getData(url);
 
-
-    console.log(response)
     this.state.renderData = await this.processingData(response.data);
-
-    console.log(this.state.renderData)
 
     this.state.data = response;
 
@@ -45,6 +64,8 @@ export default class MainPage extends React.Component
   processingData = async (data) => 
   {
     const curData = [];
+
+    debugger
 
     if ("results" in data)
     {
@@ -84,7 +105,7 @@ export default class MainPage extends React.Component
 
     const count = data.count;
 
-    this.state.countPag = count;
+    this.state.countPage = count;
 
     const countPagin = Math.ceil(count / 10)
 
@@ -112,14 +133,51 @@ export default class MainPage extends React.Component
   likeCard = (data) =>
   {
     return
+
   }
 
-  changePagination = (number) =>
+  changePagination = async (num) =>
   {
-    return
+    const url = this.state.lastUrl + `&page=${ num }`;
+
+    this.state.pagination = num;
+
+    const response = await this.getData(url);
+
+    this.state.data = response;
+    this.state.renderData = await this.processingData(response.data);
+    this.forceUpdate();
   }
 
+  onChangeInput = (value) => 
+  {
+    this.state.inputValue = value;
 
+    this.forceUpdate();
+    let url = "";
+
+    let isDischarge = false;
+
+    if (!value)
+    {
+      url = "https://swapi.dev/api/people/?page%3A1=&page=1"
+      isDischarge = true;
+    }
+    else
+    {
+      url = `https://swapi.dev/api/people/?search%3A1=&search=${ value }`
+    }
+
+    this.setDelay(async () =>
+    {
+      this.state.pagination = 1;
+      const response = await this.getData(url);
+      this.state.renderData = await this.processingData(response.data);
+      if (isDischarge) url = "https://swapi.dev/api/people/?page%3A1="
+      this.state.lastUrl = url;
+      await this.forceUpdateSync();
+    }, 500, constants.delayIndex.search)
+  }
 
 
 
@@ -127,11 +185,18 @@ export default class MainPage extends React.Component
   {
     const {
       renderData,
+      inputValue,
     } = this.state;
 
 
     return (
       <div className="main">
+        <div className="input">
+          <Input
+            value={inputValue}
+            onChange={this.onChangeInput}
+          />
+        </div>
         {renderData.map((item, index) =>
           <item.Component
             key={index}
