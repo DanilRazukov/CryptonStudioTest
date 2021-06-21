@@ -37,8 +37,8 @@ export default class Input extends React.Component
         ref={this.ref}
         type="text"
         defaultValue={this.props.value || ""}
-        className={this.props.className}
-        placeholder={this.props.placeholder}
+        className="input-s"
+        placeholder="Поиск...."
         onChange={(ev) =>
         {
           this.props.onChange(ev.target.value)

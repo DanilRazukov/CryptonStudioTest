@@ -19,15 +19,17 @@ export default class MainPage extends React.Component
       pagination: 1,
       countPage: 0,
       numberPage: 1,
+      count: 0,
+      searchData: [],
+      allCount: 0,
       inputValue: "",
-      lastUrl: "https://swapi.dev/api/people/?page%3A1=&"
+      lastUrl: "https://swapi.dev/api/people/"
     }
 
   }
 
   setDelay = (f, t) =>
   {
-
     clearTimeout(delay);
     delay = setTimeout(f, t);
   }
@@ -43,12 +45,52 @@ export default class MainPage extends React.Component
 
   async componentDidMount()
   {
-    const url = "https://swapi.dev/api/people/?page%3A1=&page=1"
+    const url = "https://swapi.dev/api/people"
     const response = await this.getData(url);
 
-    this.state.renderData = await this.processingData(response.data);
 
-    this.state.data = response;
+    const count = response.data.count;
+
+    this.state.allCount = count;
+
+    this.state.count = count;
+
+    const countPagin = Math.ceil(count / 10)
+
+    const dataArr = [];
+
+    for (let i = 1; i <= countPagin; i++)
+    {
+      if (i == 1)
+      {
+        response.data.results.forEach(item =>
+        {
+          dataArr.push({
+            ...item
+          })
+        })
+      }
+      else
+      {
+        const url = "https://swapi.dev/api/people/?page=" + i
+        const newResp = await this.getData(url);
+        newResp.data.results.forEach(item =>
+        {
+          dataArr.push({...item})
+        })
+      }
+    }
+
+
+
+    this.state.data = dataArr;
+
+    const slicePage = {}
+
+    slicePage.results = dataArr.slice(0, 10)
+    slicePage.count = count
+
+    this.state.renderData = await this.processingData(slicePage);
 
     this.forceUpdate();
   }
@@ -63,15 +105,13 @@ export default class MainPage extends React.Component
 
   processingData = async (data) => 
   {
-    const curData = [];
 
-    debugger
+    const curData = [];
 
     if ("results" in data)
     {
       for (let i = 0; i < data.results.length; i++)
       {
-        if (data.results[i].planetName) return
         const planet = await this.getData(data.results[i].homeworld);
 
         data.results[i].planetName = planet.data.name;
@@ -103,9 +143,7 @@ export default class MainPage extends React.Component
       })
     }
 
-    const count = data.count;
-
-    this.state.countPage = count;
+    const count = data.count
 
     const countPagin = Math.ceil(count / 10)
 
@@ -119,6 +157,8 @@ export default class MainPage extends React.Component
         classPag: ("number" + ((this.state.pagination == i + 1) ? " active" : " "))
       })
     }
+
+
 
     curData.push({
       Component: Pagination,
@@ -138,43 +178,80 @@ export default class MainPage extends React.Component
 
   changePagination = async (num) =>
   {
-    const url = this.state.lastUrl + `&page=${ num }`;
+    const {
+      data,
+      searchData
+    } = this.state;
+
+    const slicePage = {};
+    if (searchData.length)
+    {
+      slicePage.results = searchData.slice((num - 1) * 10, num * 10)
+    }
+    else
+    {
+      slicePage.results = data.slice((num - 1) * 10, num * 10)
+    }
+
+    slicePage.count = this.state.count
 
     this.state.pagination = num;
 
-    const response = await this.getData(url);
+    this.state.renderData = await this.processingData(slicePage)
 
-    this.state.data = response;
-    this.state.renderData = await this.processingData(response.data);
     this.forceUpdate();
   }
 
   onChangeInput = (value) => 
   {
+    const {
+      data
+    } = this.state
     this.state.inputValue = value;
 
     this.forceUpdate();
-    let url = "";
-
-    let isDischarge = false;
-
-    if (!value)
-    {
-      url = "https://swapi.dev/api/people/?page%3A1=&page=1"
-      isDischarge = true;
-    }
-    else
-    {
-      url = `https://swapi.dev/api/people/?search%3A1=&search=${ value }`
-    }
 
     this.setDelay(async () =>
     {
       this.state.pagination = 1;
-      const response = await this.getData(url);
-      this.state.renderData = await this.processingData(response.data);
-      if (isDischarge) url = "https://swapi.dev/api/people/?page%3A1="
-      this.state.lastUrl = url;
+
+      const searchArr = []
+
+      const processObj = {}
+
+
+
+      if (value)
+      {
+        data.forEach(item =>
+        {
+          if (item.name.indexOf(value) > 0)
+          {
+            searchArr.push({
+              ...item
+            })
+          }
+        })
+
+        this.state.count = searchArr.length;
+
+        processObj.results = searchArr.slice(0, 10);
+
+        processObj.count = searchArr.length;
+      }
+      else
+      {
+        this.state.count = data.length;
+        processObj.results = data.slice(0, 10);
+        processObj.count = data.length
+      }
+
+      this.state.searchData = searchArr
+
+
+
+      this.state.renderData = await this.processingData(processObj)
+
       await this.forceUpdateSync();
     }, 500, constants.delayIndex.search)
   }
@@ -187,6 +264,7 @@ export default class MainPage extends React.Component
       renderData,
       inputValue,
     } = this.state;
+
 
 
     return (
