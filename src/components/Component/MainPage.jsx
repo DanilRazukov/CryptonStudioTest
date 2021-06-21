@@ -1,5 +1,6 @@
 import React from 'react'
 import API from '../../../API';
+import axios from 'axios';
 import CharacterCard from '../Base/CharacterCard.jsx';
 import Input from '../Base/Input.jsx';
 import Pagination from '../Base/Pagination.jsx';
@@ -23,6 +24,7 @@ export default class MainPage extends React.Component
       searchData: [],
       allCount: 0,
       inputValue: "",
+      favorites: [],
       lastUrl: "https://swapi.dev/api/people/"
     }
 
@@ -63,8 +65,9 @@ export default class MainPage extends React.Component
     {
       if (i == 1)
       {
-        response.data.results.forEach(item =>
+        response.data.results.forEach((item, index) =>
         {
+          item.id = index + 1;
           dataArr.push({
             ...item
           })
@@ -74,21 +77,27 @@ export default class MainPage extends React.Component
       {
         const url = "https://swapi.dev/api/people/?page=" + i
         const newResp = await this.getData(url);
-        newResp.data.results.forEach(item =>
+        newResp.data.results.forEach((item, index) =>
         {
+          item.id = (i - 1) * 10 + index + 1;
           dataArr.push({...item})
         })
       }
     }
 
-
-
     this.state.data = dataArr;
 
-    const slicePage = {}
+    const slicePage = {};
 
-    slicePage.results = dataArr.slice(0, 10)
-    slicePage.count = count
+    const favorites = await axios.get('http://localhost:3001/Favorites/')
+    debugger
+    if (favorites.data.length)
+    {
+      this.state.favorites = favorites
+    }
+
+    slicePage.results = dataArr.slice(0, 10);
+    slicePage.count = count;
 
     this.state.renderData = await this.processingData(slicePage);
 
