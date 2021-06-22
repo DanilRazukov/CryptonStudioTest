@@ -67,7 +67,6 @@ export default class MainPage extends React.Component
         return
       }
 
-
       count = response.data.count;
 
       this.state.allCount = count;
@@ -148,6 +147,19 @@ export default class MainPage extends React.Component
     const slicePage = {};
 
     const favorites = await axios.get('http://localhost:3001/Favorites/')
+    .catch(error => {
+      
+      this.state.view = constants.view.none;
+      this.forceUpdate();
+      return
+    })
+    
+    if (!favorites?.data)
+    {
+      this.state.view = constants.view.none;
+      this.forceUpdate();
+      return
+    }
 
     if (favorites.data.length)
     {
@@ -163,6 +175,8 @@ export default class MainPage extends React.Component
 
     this.forceUpdate();
   }
+
+  componentWillUnmount()
 
   getData = async (url) =>
   {
@@ -291,12 +305,22 @@ export default class MainPage extends React.Component
         "id": item.id,
         "homeWorld": item.homeworld,
       })
+      .catch(error => {
+        this.state.view = constants.view.none;
+        this.forceUpdate();
+        return
+      })
 
       this.state.favorites.push({...item})
     }
     if (favorite)
     {
       await axios.delete(`http://localhost:3001/Favorites/${ item.id }`)
+      .catch(error => {
+        this.state.view = constants.view.none;
+        this.forceUpdate();
+        return
+      })
       const index = this.state.favorites.findIndex(elem => elem.id == item.id)
       this.state.favorites.splice(index, 1)
     }

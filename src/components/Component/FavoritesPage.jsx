@@ -2,6 +2,8 @@ import React from 'react'
 
 import axios from 'axios';
 
+import * as constants from '../constants'
+
 import CharacterCard from '../Base/CharacterCard.jsx';
 import Pagination from '../Base/Pagination.jsx';
 import Header from '../Base/Header.jsx';
@@ -15,25 +17,39 @@ export default class FavoritesPage extends React.Component
       data: [],
       renderData: [],
       pagination: 1,
-      allCount: 0,
       count: 0,
+      view: constants.view.loader,
     }
   }
 
   async componentDidMount()
   {
     const favorites = await axios.get('http://localhost:3001/Favorites/')
+      .catch(error =>
+      {
+        this.state.view = constants.view.none;
+        this.forceUpdate();
+        return
+      })
 
 
 
-    if (favorites.data.length)
+    if (favorites?.data.length)
     {
-      this.state.data = favorites.data
+      this.state.data = favorites.data;
+    }
+    else
+    {
+      this.state.view = constants.view.none;
+      this.forceUpdate();
+      return
     }
 
-    this.state.count = this.state.data.length
+    this.state.count = this.state.data.length;
 
     this.state.renderData = this.processingData(favorites.data);
+
+    this.state.view = constants.view.content;
 
     this.forceUpdate();
   }
@@ -58,7 +74,7 @@ export default class FavoritesPage extends React.Component
           data: {
             name: item.name,
             homewWorld: item.planetName,
-            src: `https://starwars-visualguide.com/assets/img/characters/${ item.id }.jpg`,
+            src: `https://starwars-visualguide.com/assets/img/characters/${item.id}.jpg`,
             id: item.id
           },
           Component: CharacterCard,
@@ -100,7 +116,13 @@ export default class FavoritesPage extends React.Component
   {
     const id = data.id;
 
-    await axios.delete(`http://localhost:3001/Favorites/${ id }`);
+    await axios.delete(`http://localhost:3001/Favorites/${id}`)
+      .catch(error =>
+      {
+        this.state.view = constants.view.none;
+        this.forceUpdate();
+        return
+      });
     const index = this.state.data.findIndex(item => item.id == id);
     this.state.data.splice(index, 1);
 
@@ -137,25 +159,36 @@ export default class FavoritesPage extends React.Component
   render()
   {
     const {
-      renderData
+      renderData,
+      view
     } = this.state;
 
     return (
       <div className="favorites">
-        {renderData.map((item, index) =>
-          <item.Component
-            key={index}
-            data={item.data}
-            onClick={item.onClick}
-            classButton={item.classButton}
-            classCard={item.classCard}
-            classHome={item.classHome}
-            className={item.className}
-            classImg={item.classImg}
-            classPagination={item.classPagination}
-            classButton={item.classButton}
-          />
-        )}
+        {
+          view == constants.view.content ?
+            <>
+              {renderData.map((item, index) =>
+                <item.Component
+                  key={index}
+                  data={item.data}
+                  onClick={item.onClick}
+                  classButton={item.classButton}
+                  classCard={item.classCard}
+                  classHome={item.classHome}
+                  className={item.className}
+                  classImg={item.classImg}
+                  classPagination={item.classPagination}
+                  classButton={item.classButton}
+                />
+              )}
+            </>
+            : view == constants.view.loader ?
+              <div className="loader-ring-m">
+                <div /><div /><div />
+              </div>
+              : null
+        }
       </div>
     )
   }

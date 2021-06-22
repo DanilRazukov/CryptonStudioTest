@@ -1,16 +1,15 @@
 {
   "Favorites": [
-    {},
-    {
-      "name": "Beru Whitesun lars",
-      "id": 7,
-      "homeWorld": "https://swapi.dev/api/planets/1/"
-    },
     {
       "name": "Luke Skywalker",
       "id": 1,
       "homeWorld": "https://swapi.dev/api/planets/1/"
     },
+    {
+      "name": "Beru Whitesun lars",
+      "id": 7,
+      "homeWorld": "https://swapi.dev/api/planets/1/"
+    },    
     {
       "name": "Obi-Wan Kenobi",
       "id": 10,
@@ -20,31 +19,6 @@
       "name": "Owen Lars",
       "id": 6,
       "homeWorld": "https://swapi.dev/api/planets/1/"
-    },
-    {
-      "name": "C-3PO",
-      "id": 2,
-      "homeWorld": "https://swapi.dev/api/planets/1/"
-    },
-    {
-      "name": "Darth Vader",
-      "id": 4,
-      "homeWorld": "https://swapi.dev/api/planets/1/"
-    },
-    {
-      "name": "Jabba Desilijic Tiure",
-      "id": 16,
-      "homeWorld": "https://swapi.dev/api/planets/24/"
-    },
-    {
-      "name": "Greedo",
-      "id": 15,
-      "homeWorld": "https://swapi.dev/api/planets/23/"
-    },
-    {
-      "name": "Yoda",
-      "id": 19,
-      "homeWorld": "https://swapi.dev/api/planets/28/"
     }
   ]
 }

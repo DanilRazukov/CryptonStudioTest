@@ -5,3 +5,7 @@ export const view = {
   loader: 1,
   content: 2,
 }
+
+export const delayIndex = {
+  search: 1,
+}
