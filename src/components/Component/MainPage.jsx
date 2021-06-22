@@ -176,8 +176,6 @@ export default class MainPage extends React.Component
     this.forceUpdate();
   }
 
-  componentWillUnmount()
-
   getData = async (url) =>
   {
 
@@ -214,9 +212,9 @@ export default class MainPage extends React.Component
         let classButton = "like-button";
         this.state.favorites.forEach(elem =>
         {
+          if (!elem.id) return 
           if (elem.id == item.id)
           {
-
             classButton += " like"
             item.favorite = 1;
           }

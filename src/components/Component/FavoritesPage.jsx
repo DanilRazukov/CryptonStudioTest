@@ -24,15 +24,13 @@ export default class FavoritesPage extends React.Component
 
   async componentDidMount()
   {
-    const favorites = await axios.get('http://localhost:3001/Favorites/')
+    let favorites = await axios.get('http://localhost:3001/Favorites/')
       .catch(error =>
       {
         this.state.view = constants.view.none;
         this.forceUpdate();
         return
       })
-
-
 
     if (favorites?.data.length)
     {

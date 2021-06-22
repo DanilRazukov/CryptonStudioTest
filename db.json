@@ -1,24 +1,4 @@
 {
   "Favorites": [
-    {
-      "name": "Luke Skywalker",
-      "id": 1,
-      "homeWorld": "https://swapi.dev/api/planets/1/"
-    },
-    {
-      "name": "Beru Whitesun lars",
-      "id": 7,
-      "homeWorld": "https://swapi.dev/api/planets/1/"
-    },    
-    {
-      "name": "Obi-Wan Kenobi",
-      "id": 10,
-      "homeWorld": "https://swapi.dev/api/planets/20/"
-    },
-    {
-      "name": "Owen Lars",
-      "id": 6,
-      "homeWorld": "https://swapi.dev/api/planets/1/"
-    }
   ]
 }
