@@ -10,11 +10,10 @@ body {
 .loader-ring-m {
   width: 250px;
   height: 250px;
-  position: absolute;
-  top: 0;
+  position: relative;
+  top: 225px;
   right: 0;
   bottom: 0;
-  left: 100px;
   margin: auto;
 
   @keyframes loader-ring-m {
