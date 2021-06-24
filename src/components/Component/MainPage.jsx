@@ -22,14 +22,11 @@ export default class MainPage extends React.Component
       data: [],
       renderData: [],
       pagination: 1,
-      countPage: 0,
-      numberPage: 1,
-      count: 0,
-      searchData: [],
-      allCount: 0,
       inputValue: "",
       favorites: [],
-      lastUrl: "https://swapi.dev/api/people/"
+      searchUrl: "",
+      count: 0,
+      favorites: [],
     }
 
   }
@@ -48,128 +45,54 @@ export default class MainPage extends React.Component
     });
   }
 
+  killComponent = () =>
+  {
+    this.state.view = constants.view.none;
+  }
+
 
   async componentDidMount()
   {
-    const dataArr = [];
+    const url = constants.url + "?page=1"
+    const response = await this.getData(url);
 
-    let count
-
-    if (!MainContainer.this.state.data.length)
+    if (!response)
     {
-      const url = "https://swapi.dev/api/people"
-      const response = await this.getData(url);
-
-      if (!response)
-      {
-        this.state.view = constants.view.none;
-        this.forceUpdate();
-        return
-      }
-
-      count = response.data.count;
-
-      this.state.allCount = count;
-
-      this.state.count = count;
-
-      const countPagin = Math.ceil(count / 10)
-
-      for (let i = 1; i <= countPagin; i++)
-      {
-        if (i == 1)
-        {
-          for (let i = 0; i < response.data.results.length; i++)
-          {
-            const planet = await this.getData(response.data.results[i].homeworld);
-
-            if (!planet)
-            {
-              this.state.view = constants.view.none;
-              this.forceUpdate();
-              return
-            }
-
-            response.data.results[i].planetName = planet.data.name;
-          }
-          response.data.results.forEach((item, index) =>
-          {
-            item.id = index + 1;
-            dataArr.push({
-              ...item
-            })
-          })
-        }
-        else
-        {
-          const url = "https://swapi.dev/api/people/?page=" + i
-          const newResp = await this.getData(url);
-
-          if (!newResp)
-          {
-            this.state.view = constants.view.none;
-            this.forceUpdate();
-            return
-          }
-          for (let i = 0; i < newResp.data.results.length; i++)
-          {
-            const planet = await this.getData(newResp.data.results[i].homeworld);
-
-            newResp.data.results[i].planetName = planet.data.name;
-          }
-          newResp.data.results.forEach((item, index) =>
-          {
-            item.id = (i - 1) * 10 + index + 1;
-            dataArr.push({...item})
-          })
-        }
-      }
-
-      MainContainer.this.saveData(dataArr)
-
+      this.state.view = constants.view.none;
+      this.forceUpdate();
+      return
     }
-    else
+
+
+
+    const favorites = JSON.parse(localStorage.getItem("Favorites"));
+
+    response.data.results.forEach(item =>
     {
-      MainContainer.this.state.data.forEach(item =>
+      const strData = item.url.split("/");
+      item.id = strData[strData.length - 2];
+      item.favorite = 0;
+
+      if (favorites)
       {
-        dataArr.push({
-          ...item
+        debugger
+        favorites.forEach(elem =>
+        {
+          if (elem.id == item.id)
+          {
+            item.favorite = 1;
+          }
         })
-      })
-
-      this.state.allCount = count;
-
-      this.state.count = count;
-    }
-
-    this.state.data = dataArr;
-
-    const slicePage = {};
-
-    const favorites = await axios.get('http://localhost:3001/Favorites/')
-    .catch(error => {
-      
-      this.state.view = constants.view.none;
-      this.forceUpdate();
-      return
+      }
     })
-    
-    if (!favorites?.data)
-    {
-      this.state.view = constants.view.none;
-      this.forceUpdate();
-      return
-    }
 
-    if (favorites.data.length)
-    {
-      this.state.favorites = favorites.data
-    }
+    this.state.favorites = favorites || []
 
-    slicePage.results = dataArr.slice(0, 10);
-    slicePage.count = count;
+    this.state.data = response.data.results;
 
-    this.state.renderData = this.processingData(slicePage);
+    this.state.count = response.data.count;
+
+    this.state.renderData = await this.processingData(response.data);
 
     this.state.view = constants.view.content;
 
@@ -184,7 +107,7 @@ export default class MainPage extends React.Component
     return data
   }
 
-  processingData = (data) => 
+  processingData = async (data) => 
   {
 
     const curData = [];
@@ -198,27 +121,31 @@ export default class MainPage extends React.Component
 
     if ("results" in data)
     {
-      data.results.forEach(item =>
+      for (let i = 0; i < data.results.length; i++)
       {
+        const item = data.results[i]
 
-        const id = item.id
+        if (!item.homePlanet)
+        {
+          const response = await this.getData(item.homeworld);
+
+          if (!response)
+          {
+            this.killComponent()
+            return
+          }
+          item.homePlanet = response.data.name;
+        }
 
         const newData = {
           name: item.name,
-          homewWorld: item.planetName,
-          src: `https://starwars-visualguide.com/assets/img/characters/${ id }.jpg`,
-          id
+          homeWorld: item.planetName,
+          src: `https://starwars-visualguide.com/assets/img/characters/${item.id}.jpg`,
+          id: item.id,
         }
-        let classButton = "like-button";
-        this.state.favorites.forEach(elem =>
-        {
-          if (!elem.id) return 
-          if (elem.id == item.id)
-          {
-            classButton += " like"
-            item.favorite = 1;
-          }
-        })
+
+        const classButton = "like-button" + (item.favorite ? " like" : "");
+
         curData.push({
           Component: CharacterCard,
           classCard: "card",
@@ -229,12 +156,10 @@ export default class MainPage extends React.Component
           data: newData,
           onClick: this.likeCard
         })
-      })
+      }
     }
 
-    const count = data.count
-
-    const countPagin = Math.ceil(count / 10)
+    const countPagin = Math.ceil(data.count / 10)
 
     const arrPag = [];
 
@@ -259,99 +184,99 @@ export default class MainPage extends React.Component
 
   likeCard = async (data) =>
   {
-    const id = data.id;
+    const {
+      count,
+    } = this.state
 
-    const curObj = {};
-    let item;
-    let favorite;
-    let num;
-    let index;
+    const id = data.id
 
-    if (!this.state.searchData.length)
+    const likeArr = this.state.favorites;
+
+    debugger
+
+    this.state.data.forEach(item =>
     {
-      index = this.state.data.findIndex(item => item.id == id)
+      if (item.id == data.id)
+      {
+        item.favorite = !item.favorite;
+        if (likeArr)
+        {
+          const index = likeArr.findIndex(obj => obj.id == item.id)
+          if (index >= 0)
+          {
+            likeArr.splice(index, 1)
+          }
+        }
+      }
 
-      favorite = this.state.data[index].favorite;
-      item = this.state.data[index];
+      if (item.favorite && !likeArr.some(elem => elem.id == item.id))
+      {
+        likeArr.push({
+          id: item.id
+        })
+      }
+    })
 
-      this.state.data[index].favorite = !favorite
+    localStorage.setItem("Favorites", JSON.stringify(likeArr))
 
-      num = this.state.pagination;
-      curObj.results = this.state.data.slice((num - 1) * 10, num * 10);
-      curObj.count = this.state.count;
-      item = this.state.data[index];
-    }
-    else
-    {
-      index = this.state.searchData.findIndex(item => item.id == id)
+    this.state.favorites = likeArr;
 
-      favorite = this.state.searchData[index].favorite;
-      item = this.state.searchData[index];
-
-      this.state.searchData[index].favorite = !favorite
-
-      num = this.state.pagination;
-      curObj.results = this.state.searchData.slice((num - 1) * 10, num * 10);
-      curObj.count = this.state.count;
-      item = this.state.searchData[index];
-    }
-
-    if (!favorite)
-    {
-      await axios.post('http://localhost:3001/Favorites/', {
-        "name": item.name,
-        "id": item.id,
-        "homeWorld": item.homeworld,
-      })
-      .catch(error => {
-        this.state.view = constants.view.none;
-        this.forceUpdate();
-        return
-      })
-
-      this.state.favorites.push({...item})
-    }
-    if (favorite)
-    {
-      await axios.delete(`http://localhost:3001/Favorites/${ item.id }`)
-      .catch(error => {
-        this.state.view = constants.view.none;
-        this.forceUpdate();
-        return
-      })
-      const index = this.state.favorites.findIndex(elem => elem.id == item.id)
-      this.state.favorites.splice(index, 1)
-    }
-
-
-    this.state.renderData = this.processingData(curObj)
+    this.state.renderData = await this.processingData({
+      results: this.state.data,
+      count: count
+    })
 
     this.forceUpdate();
-
   }
 
   changePagination = async (num) =>
   {
     const {
-      data,
-      searchData
+      searchUrl,
+      favorites
     } = this.state;
 
-    const slicePage = {};
-    if (searchData.length)
-    {
-      slicePage.results = searchData.slice((num - 1) * 10, num * 10)
-    }
-    else
-    {
-      slicePage.results = data.slice((num - 1) * 10, num * 10)
-    }
+    this.state.view = constants.view.loader;
 
-    slicePage.count = this.state.count
+    await this.forceUpdateSync();
+
+    const url = searchUrl ? (searchUrl + "&page=" + num) : (constants.url + "?page=" + num)
+
+    const response = await this.getData(url)
+
+    if (!response)
+    {
+      this.killComponent()
+      return
+    }
 
     this.state.pagination = num;
 
-    this.state.renderData = this.processingData(slicePage)
+    response.data.results.forEach(item =>
+    {
+      const strData = item.url.split("/");
+      item.id = strData[strData.length - 2];
+      item.favorite = 0;
+
+      if (favorites.length)
+      {
+        favorites.forEach(elem =>
+        {
+          if (elem.id == item.id)
+          {
+            item.favorite = 1;
+          }
+        })
+      }
+    })
+
+    this.state.data = response.data.results;
+
+    this.state.count = response.data.count;
+
+    this.state.renderData = await this.processingData(response.data);
+
+    this.state.view = constants.view.content;
 
     this.forceUpdate();
   }
@@ -365,49 +290,66 @@ export default class MainPage extends React.Component
 
     this.forceUpdate();
 
+    if (!value)
+    {
+      this.state.searchUrl = ""
+    }
+
+
     this.setDelay(async () =>
     {
       this.state.pagination = 1;
 
-      const searchArr = []
+      await this.search(value)
+    }, 500, constants.delayIndex.search)
+  }
 
-      const processObj = {}
+  search = async (value) =>
+  {
+    const {
+      favorites
+    } = this.state;
 
 
+    const url = constants.url + "?search=" + value;
 
-      if (value)
+    this.state.searchUrl = url;
+
+    const response = await this.getData(url);
+
+    if (!response)
+    {
+      this.killComponent();
+
+      return
+    }
+
+    response.data.results.forEach(item =>
+    {
+      const strData = item.url.split("/");
+      item.id = strData[strData.length - 2];
+      item.favorite = 0;
+
+
+      if (favorites.length)
       {
-        data.forEach(item =>
+        favorites.forEach(elem =>
         {
-          if (item.name.indexOf(value) > 0)
+          if (elem.id == item.id)
           {
-            searchArr.push({
-              ...item
-            })
+            item.favorite = 1;
           }
         })
-
-        this.state.count = searchArr.length;
-
-        processObj.results = searchArr.slice(0, 10);
-
-        processObj.count = searchArr.length;
       }
-      else
-      {
-        this.state.count = data.length;
-        processObj.results = data.slice(0, 10);
-        processObj.count = data.length
-      }
+    })
 
-      this.state.searchData = searchArr
+    this.state.data = response.data.results;
 
+    this.state.count = response.data.count;
 
+    this.state.renderData = await this.processingData(response.data);
 
-      this.state.renderData = this.processingData(processObj)
-
-      await this.forceUpdateSync();
-    }, 500, constants.delayIndex.search)
+    this.forceUpdate();
   }
 
 

@@ -9,3 +9,5 @@ export const view = {
 export const delayIndex = {
   search: 1,
 }
+
+export const url = "https://swapi.dev/api/people/"
