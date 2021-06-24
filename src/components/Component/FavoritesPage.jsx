@@ -1,6 +1,6 @@
 import React from 'react'
 
-import axios from 'axios';
+import API from "../API"
 
 import * as constants from '../constants'
 
@@ -14,7 +14,7 @@ export default class FavoritesPage extends React.Component
   {
     super(props);
     this.state = {
-      data: [],
+      favorites: [],
       renderData: [],
       pagination: 1,
       count: 0,
@@ -22,37 +22,27 @@ export default class FavoritesPage extends React.Component
     }
   }
 
+  getData = async (url) =>
+  {
+    const data = await API.get(url);
+
+    return data
+  }
+
   async componentDidMount()
   {
-    let favorites = await axios.get('http://localhost:3001/Favorites/')
-      .catch(error =>
-      {
-        this.state.view = constants.view.none;
-        this.forceUpdate();
-        return
-      })
+    const favorites = JSON.parse(localStorage.getItem("Favorites")) || [];
 
-    if (favorites?.data.length)
-    {
-      this.state.data = favorites.data;
-    }
-    else
-    {
-      this.state.view = constants.view.none;
-      this.forceUpdate();
-      return
-    }
+    this.state.favorites = favorites;
 
-    this.state.count = this.state.data.length;
-
-    this.state.renderData = this.processingData(favorites.data);
+    this.state.renderData = await this.processingData(favorites);
 
     this.state.view = constants.view.content;
 
     this.forceUpdate();
   }
 
-  processingData = (data) =>
+  processingData = async (data) =>
   {
     const curData = [];
 
@@ -65,16 +55,25 @@ export default class FavoritesPage extends React.Component
 
     if (data.length)
     {
-      data.forEach(item =>
+      for (let i = 0; i < data.length; i++)
       {
-        if (!item.id) return
+        const id = data[i].id;
+
+        const url = constants.url + id;
+
+        const response = await this.getData(url);
+
+        const homeWorld = await this.getData(response.data.homeworld);
+
+        const item = {
+          id,
+          name: response.data.name,
+          homeWorld: homeWorld.data.name,
+          src: `https://starwars-visualguide.com/assets/img/characters/${id}.jpg`
+        }
+
         curData.push({
-          data: {
-            name: item.name,
-            homewWorld: item.planetName,
-            src: `https://starwars-visualguide.com/assets/img/characters/${item.id}.jpg`,
-            id: item.id
-          },
+          data: item,
           Component: CharacterCard,
           classCard: "card",
           className: "person-name",
@@ -83,9 +82,11 @@ export default class FavoritesPage extends React.Component
           classImg: "person-ava",
           onClick: this.likeClick
         })
-      })
 
-      const count = this.state.count;
+        if (i == 9) break
+      }
+
+      const count = this.state.favorites.length;
 
       const countPagin = Math.ceil(count / 10);
 
@@ -106,51 +107,40 @@ export default class FavoritesPage extends React.Component
         onClick: this.changePagination
       })
     }
-
     return curData
   }
 
   likeClick = async (data) => 
   {
+    const {
+      pagination
+    } = this.state;
     const id = data.id;
 
-    await axios.delete(`http://localhost:3001/Favorites/${id}`)
-      .catch(error =>
-      {
-        this.state.view = constants.view.none;
-        this.forceUpdate();
-        return
-      });
-    const index = this.state.data.findIndex(item => item.id == id);
-    this.state.data.splice(index, 1);
+    this.state.view = constants.view.loader;
+    this.forceUpdate();
 
-    this.state.count = this.state.data.length;
+    const index = this.state.favorites.findIndex(item => item.id == id);
 
-    let dataArr = this.state.data.slice((this.state.pagination - 1) * 10, this.state.pagination * 10)
+    this.state.favorites.splice(index, 1);
 
-    if (!dataArr.length)
-    {
-      dataArr = this.state.data.slice((this.state.pagination - 2) * 10, (this.state.pagination - 1) * 10)
-      --this.state.pagination
-    }
+    localStorage.setItem("Favorites",JSON.stringify(this.state.favorites));
 
-    this.state.renderData = this.processingData(dataArr)
+    const part = this.state.favorites.slice((pagination-1)*10, pagination * 10);
+    this.state.renderData = await this.processingData(part);
+    this.state.view = constants.view.content;
     this.forceUpdate();
   }
 
-  changePagination = (num) =>
+  changePagination = async (num) =>
   {
-    const {
-      data,
-    } = this.state;
+    this.state.view = constants.view.loader;
+    await this.forceUpdate();
 
-
-    const dataArr = data.slice((num - 1) * 10, num * 10)
-
+    const part = this.state.favorites.slice((num - 1) * 10, num * 10)
     this.state.pagination = num;
-
-    this.state.renderData = this.processingData(dataArr)
-
+    this.state.renderData = await this.processingData(part);
+    this.state.view = constants.view.content;
     this.forceUpdate();
   }
 

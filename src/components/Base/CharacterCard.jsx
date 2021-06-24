@@ -14,8 +14,6 @@ export default class CharacterCard extends React.Component
       classImg
     } = this.props
 
-
-
     return (
       <div className={classCard}>
         <img src={data.src} className={classImg} />
@@ -23,7 +21,7 @@ export default class CharacterCard extends React.Component
           Name: {data.name}
         </div>
         <div className={classHome}>
-          Home World: {data.homewWorld}
+          Home World: {data.homeWorld}
         </div>
         <button className={classButton} onClick={(ev) =>
         {

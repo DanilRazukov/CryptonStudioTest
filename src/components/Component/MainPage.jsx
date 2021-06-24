@@ -1,8 +1,5 @@
 import React from 'react'
-import API from '../../../API';
-import axios from 'axios';
-
-import MainContainer from '../MainContainer.jsx';
+import API from '../API';
 
 import CharacterCard from '../Base/CharacterCard.jsx';
 import Input from '../Base/Input.jsx';
@@ -75,7 +72,7 @@ export default class MainPage extends React.Component
 
       if (favorites)
       {
-        debugger
+        
         favorites.forEach(elem =>
         {
           if (elem.id == item.id)
@@ -101,7 +98,6 @@ export default class MainPage extends React.Component
 
   getData = async (url) =>
   {
-
     const data = await API.get(url);
 
     return data
@@ -128,18 +124,13 @@ export default class MainPage extends React.Component
         if (!item.homePlanet)
         {
           const response = await this.getData(item.homeworld);
-
-          if (!response)
-          {
-            this.killComponent()
-            return
-          }
+          
           item.homePlanet = response.data.name;
         }
 
         const newData = {
           name: item.name,
-          homeWorld: item.planetName,
+          homeWorld: item.homePlanet,
           src: `https://starwars-visualguide.com/assets/img/characters/${item.id}.jpg`,
           id: item.id,
         }
@@ -192,7 +183,7 @@ export default class MainPage extends React.Component
 
     const likeArr = this.state.favorites;
 
-    debugger
+    
 
     this.state.data.forEach(item =>
     {

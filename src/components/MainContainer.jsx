@@ -9,22 +9,6 @@ import FavoritesPage from './Component/FavoritesPage.jsx'
 
 export default class MainContainer extends React.Component
 {
-  constructor(props)
-  {
-    super(props);
-    this.state = {
-      data: []
-    }
-
-    MainContainer.this = this;
-  }
-
-  saveData = (data) =>
-  {
-    this.state.data = data;
-  }
-
-
   render()
   {
     return (
