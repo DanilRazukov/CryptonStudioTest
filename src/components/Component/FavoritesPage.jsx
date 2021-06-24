@@ -23,6 +23,14 @@ export default class FavoritesPage extends React.Component
     }
   }
 
+  forceUpdateSync = async () =>
+  {
+    await new Promise((resolve, reject) =>
+    {
+      this.forceUpdate(() => {resolve()});
+    });
+  }
+
   getData = async (url) =>
   {
     const data = await API.get(url);
@@ -128,7 +136,7 @@ export default class FavoritesPage extends React.Component
     const id = data.id;
 
     this.state.view = constants.view.loader;
-    this.forceUpdate();
+    await this.forceUpdateSync();
 
     const index = this.state.favorites.findIndex(item => item.id == id);
 
