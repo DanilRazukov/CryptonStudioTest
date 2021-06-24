@@ -1,4 +1,0 @@
-Воспользоваться json-server (https://github.com/typicode/json-server);
-1. npm i -g json-rever
-2. В json-server.json можно изменить номер порта для старта сервера на любой удобный (В коде так же придется изменить url запроса).
-3. Запуск json-server db.json

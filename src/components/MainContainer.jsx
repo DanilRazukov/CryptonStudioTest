@@ -3,7 +3,7 @@ import {Route, BrowserRouter as Router, Switch} from 'react-router-dom';
 
 import MainPage from './Component/MainPage.jsx';
 import NavBar from './Component/NavBar.jsx';
-import Header from './Component/Header.jsx';
+import Cap from './Component/Cap.jsx';
 import FavoritesPage from './Component/FavoritesPage.jsx'
 
 
@@ -18,7 +18,7 @@ export default class MainContainer extends React.Component
           <Route exact path="/" component={MainPage} />
           <Route path="/favorites" component={FavoritesPage} />
         </div>
-        <Header />
+        <Cap />
       </div>
     )
   }

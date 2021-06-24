@@ -7,6 +7,7 @@ import * as constants from '../constants'
 import CharacterCard from '../Base/CharacterCard.jsx';
 import Pagination from '../Base/Pagination.jsx';
 import Header from '../Base/Header.jsx';
+import Message from '../Base/Message.jsx'
 
 export default class FavoritesPage extends React.Component
 {
@@ -80,7 +81,7 @@ export default class FavoritesPage extends React.Component
           classHome: "planet-name",
           classButton: "like-button like",
           classImg: "person-ava",
-          onClick: this.likeClick
+          onClick: this.handleLikeClick
         })
 
         if (i == 9) break
@@ -107,10 +108,19 @@ export default class FavoritesPage extends React.Component
         onClick: this.changePagination
       })
     }
+    else
+    {
+      curData.push({
+        Component: Message,
+        data: {
+          message: "Now you have not favorite heroes"
+        }
+      })
+    }
     return curData
   }
 
-  likeClick = async (data) => 
+  handleLikeClick = async (data) => 
   {
     const {
       pagination

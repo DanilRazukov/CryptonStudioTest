@@ -145,7 +145,7 @@ export default class MainPage extends React.Component
           classButton,
           classImg: "person-ava",
           data: newData,
-          onClick: this.likeCard
+          onClick: this.handleLikeClick
         })
       }
     }
@@ -173,7 +173,7 @@ export default class MainPage extends React.Component
   }
 
 
-  likeCard = async (data) =>
+  handleLikeClick = async (data) =>
   {
     const {
       count,
@@ -183,8 +183,7 @@ export default class MainPage extends React.Component
 
     const likeArr = this.state.favorites;
 
-    
-
+  
     this.state.data.forEach(item =>
     {
       if (item.id == data.id)

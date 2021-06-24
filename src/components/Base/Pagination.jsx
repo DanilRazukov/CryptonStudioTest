@@ -9,8 +9,6 @@ export default class Pagination extends React.Component
       data
     } = this.props
 
-
-
     return (
       <div className={classPagination}>
         {
@@ -20,7 +18,6 @@ export default class Pagination extends React.Component
                 className={item.classPag}
                 onClick={(ev) =>
                 {
-                  ev.stopPropagation();
                   this.props.onClick(item.index)
                 }}
               >

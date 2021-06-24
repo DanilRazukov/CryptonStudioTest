@@ -25,8 +25,6 @@ export default class CharacterCard extends React.Component
         </div>
         <button className={classButton} onClick={(ev) =>
         {
-          ev.preventDefault;
-          ev.stopPropagation;
           this.props.onClick(data)
         }} />
       </div>

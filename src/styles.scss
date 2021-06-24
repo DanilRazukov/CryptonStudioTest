@@ -138,6 +138,12 @@ body {
     }
   }
 
+  .message {
+    position: relative;
+    top: 225px;
+    font-size: 24px;
+  }
+
   .nav {
     grid-area: n;
     background-color: aquamarine;

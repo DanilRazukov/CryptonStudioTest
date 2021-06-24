@@ -9,15 +9,6 @@ export default class Input extends React.Component
     this.state = {
       input: 0,
     }
-
-    if (!Input.this)
-    {
-      Input.this = {};
-    }
-    if (this.props.id)
-    {
-      Input.this[this.props.id] = this;
-    }
   }
   shouldComponentUpdate(nextProps)
   {
