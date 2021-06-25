@@ -11,7 +11,8 @@ export default class CharacterCard extends React.Component
       classCard,
       classHome,
       classButton,
-      classImg
+      classImg,
+      index
     } = this.props
 
     return (
@@ -23,9 +24,9 @@ export default class CharacterCard extends React.Component
         <div className={classHome}>
           Home World: {data.homeWorld}
         </div>
-        <button className={classButton} onClick={(ev) =>
+        <button className={classButton + (data.favorite ? " like" : "")} onClick={(ev) =>
         {
-          this.props.onClick(data)
+          this.props.onClick(data.id, index)
         }} />
       </div>
     )

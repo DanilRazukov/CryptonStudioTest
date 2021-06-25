@@ -81,6 +81,7 @@ export default class FavoritesPage extends React.Component
           id,
           name: response.data.name,
           homeWorld: homeWorld.data.name,
+          favorite: 1,
           src: `https://starwars-visualguide.com/assets/img/characters/${id}.jpg`
         }
 
@@ -90,7 +91,7 @@ export default class FavoritesPage extends React.Component
           classCard: "card",
           className: "person-name",
           classHome: "planet-name",
-          classButton: "like-button like",
+          classButton: "like-button",
           classImg: "person-ava",
           onClick: this.handleLikeClick
         })

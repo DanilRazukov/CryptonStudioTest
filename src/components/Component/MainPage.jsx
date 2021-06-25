@@ -115,14 +115,12 @@ export default class MainPage extends React.Component
           favorite: item.favorite
         };
 
-        const classButton = "like-button" + (item.favorite ? " like" : "");
-
         curData.push({
           Component: CharacterCard,
           classCard: "card",
           className: "person-name",
           classHome: "planet-name",
-          classButton,
+          classButton: "like-button",
           classImg: "person-ava",
           data: newData,
           onClick: this.handleLikeClick
@@ -152,7 +150,7 @@ export default class MainPage extends React.Component
   }
 
 
-  handleLikeClick = async (data) =>
+  handleLikeClick = async (id, ind) =>
   {
     const {
       count,
@@ -160,26 +158,19 @@ export default class MainPage extends React.Component
 
     const likeArr = this.state.favorites;
 
-    data.favorite = !data.favorite;
-
-    let index = likeArr.findIndex(item => item.id == data.id);
+    const index = likeArr.findIndex(item => item.id == id);
 
     index >= 0 ? likeArr.splice(index, 1) : likeArr.push({
-      id: data.id
+      id,
     });
 
-    index = this.state.data.findIndex(item => item.id == data.id);
+    const elem = this.state.renderData[ind].data
 
-    if (index >= 0) this.state.data[index].favorite = data.favorite;
+    this.state.renderData[ind].data.favorite = !elem.favorite
 
     localStorage.setItem("Favorites", JSON.stringify(likeArr));
 
     this.state.favorites = likeArr;
-
-    this.state.renderData = await this.processingData({
-      results: this.state.data,
-      count: count
-    });
 
     this.forceUpdate();
   }
@@ -308,6 +299,7 @@ export default class MainPage extends React.Component
               {renderData.map((item, index) =>
                 <item.Component
                   key={index}
+                  index={index}
                   data={item.data}
                   onClick={item.onClick}
                   classButton={item.classButton}
