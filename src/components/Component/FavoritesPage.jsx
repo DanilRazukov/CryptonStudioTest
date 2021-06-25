@@ -126,7 +126,7 @@ export default class FavoritesPage extends React.Component
     return curData
   }
 
-  handleLikeClick =  async (id) => 
+  handleLikeClick = (id) => 
   {
     const {
       pagination
