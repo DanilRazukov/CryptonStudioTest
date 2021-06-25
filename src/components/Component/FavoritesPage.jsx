@@ -132,17 +132,17 @@ export default class FavoritesPage extends React.Component
     return curData
   }
 
-  handleLikeClick = async (data) => 
+  handleLikeClick = async (id) => 
   {
     const {
       pagination
     } = this.state;
-
+    
     this.state.view = constants.view.loader;
     
     await this.forceUpdateSync();
 
-    const index = this.state.favorites.findIndex(item => item.id == data.id);
+    const index = this.state.favorites.findIndex(item => item.id == id);
 
     this.state.favorites.splice(index, 1);
 
