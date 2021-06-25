@@ -60,8 +60,6 @@ export default class MainPage extends React.Component
       return
     }
 
-
-
     const favorites = JSON.parse(localStorage.getItem("Favorites"));
 
     response.data.results.forEach(item =>
@@ -133,6 +131,7 @@ export default class MainPage extends React.Component
           homeWorld: item.homePlanet,
           src: `https://starwars-visualguide.com/assets/img/characters/${item.id}.jpg`,
           id: item.id,
+          favorite: item.favorite
         }
 
         const classButton = "like-button" + (item.favorite ? " like" : "");
@@ -179,41 +178,28 @@ export default class MainPage extends React.Component
       count,
     } = this.state
 
-    const id = data.id
-
     const likeArr = this.state.favorites;
 
-  
-    this.state.data.forEach(item =>
-    {
-      if (item.id == data.id)
-      {
-        item.favorite = !item.favorite;
-        if (likeArr)
-        {
-          const index = likeArr.findIndex(obj => obj.id == item.id)
-          if (index >= 0)
-          {
-            likeArr.splice(index, 1)
-          }
-        }
-      }
+    data.favorite = !data.favorite
 
-      if (item.favorite && !likeArr.some(elem => elem.id == item.id))
-      {
-        likeArr.push({
-          id: item.id
-        })
-      }
+    
+
+    let index = likeArr.findIndex(item => item.id == data.id);
+
+    index >= 0 ? likeArr.splice(index, 1) : likeArr.push({
+      id: data.id
     })
+
+    index = this.state.data.findIndex(item => item.id == data.id)
+
+    if (index >= 0) this.state.data[index].favorite = data.favorite
 
     localStorage.setItem("Favorites", JSON.stringify(likeArr))
 
     this.state.favorites = likeArr;
 
     this.state.renderData = await this.processingData({
-      results: this.state.data,
-      count: count
+      results: this.state.data
     })
 
     this.forceUpdate();
