@@ -90,12 +90,24 @@ export default class MainPage extends React.Component
 
     const curData = [];
 
-    curData.push({
-      Component: Header,
-      data: {
-        header: "All characters"
-      }
-    })
+    if (!this.state.inputValue)
+    {
+      curData.push({
+        Component: Header,
+        data: {
+          header: "All characters"
+        }
+      })
+    }
+    else
+    {
+      curData.push({
+        Component: Header,
+        data: {
+          header: "Search results"
+        }
+      })
+    }
 
     if ("results" in data)
     {
@@ -312,9 +324,18 @@ export default class MainPage extends React.Component
                 />)}
             </>
             : view == constants.view.loader ?
-              <div className="loader-ring-m">
-                <div /><div /><div />
-              </div>
+
+              <>
+                <div className="input">
+                  <Input
+                    value={inputValue}
+                    onChange={this.onChangeInput}
+                  />
+                </div>
+                <div className="loader-ring-m">
+                  <div /><div /><div />
+                </div>
+              </>
               : null
         }
       </div>

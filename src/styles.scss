@@ -127,8 +127,18 @@ body {
         .input-s {
           width: 500px;
           height: 20px;
+          padding:10px;
+          margin-top: 10px;
+          border: 2px solid black;
+          border-radius: 15px;
+        }
+
+        .input-s:focus{
+          outline: none;
         }
       }
+
+      
 
 
     }
