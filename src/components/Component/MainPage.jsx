@@ -23,7 +23,6 @@ export default class MainPage extends React.Component
       favorites: [],
       searchUrl: "",
       count: 0,
-      favorites: [],
     }
 
   }
@@ -42,9 +41,10 @@ export default class MainPage extends React.Component
     });
   }
 
-  killComponent = () =>
+  setViewMode = (mode) =>
   {
-    this.state.view = constants.view.none;
+    this.state.view = mode;
+    this.forceUpdate();
   }
 
 
@@ -55,43 +55,27 @@ export default class MainPage extends React.Component
 
     if (!response)
     {
-      this.state.view = constants.view.none;
-      this.forceUpdate();
+      this.setViewMode(constants.view.none);
       return
     }
 
-    const favorites = JSON.parse(localStorage.getItem("Favorites"));
+    const favorites = JSON.parse(localStorage.getItem("Favorites")) || [];
 
     response.data.results.forEach(item =>
     {
       const strData = item.url.split("/");
       item.id = strData[strData.length - 2];
-      item.favorite = 0;
-
-      if (favorites)
-      {
-        
-        favorites.forEach(elem =>
-        {
-          if (elem.id == item.id)
-          {
-            item.favorite = 1;
-          }
-        })
-      }
+      item.favorite = favorites.some(elem => elem.id == item.id);
     })
 
-    this.state.favorites = favorites || []
+    this.state.favorites = favorites || [];
 
     this.state.data = response.data.results;
-
     this.state.count = response.data.count;
-
     this.state.renderData = await this.processingData(response.data);
 
-    this.state.view = constants.view.content;
 
-    this.forceUpdate();
+    this.setViewMode(constants.view.content);
   }
 
   getData = async (url) =>
@@ -117,14 +101,11 @@ export default class MainPage extends React.Component
     {
       for (let i = 0; i < data.results.length; i++)
       {
-        const item = data.results[i]
+        const item = data.results[i];
 
-        if (!item.homePlanet)
-        {
-          const response = await this.getData(item.homeworld);
-          
-          item.homePlanet = response.data.name;
-        }
+        const response = await this.getData(item.homeworld);
+
+        item.homePlanet = response.data.name;
 
         const newData = {
           name: item.name,
@@ -132,7 +113,7 @@ export default class MainPage extends React.Component
           src: `https://starwars-visualguide.com/assets/img/characters/${item.id}.jpg`,
           id: item.id,
           favorite: item.favorite
-        }
+        };
 
         const classButton = "like-button" + (item.favorite ? " like" : "");
 
@@ -145,21 +126,20 @@ export default class MainPage extends React.Component
           classImg: "person-ava",
           data: newData,
           onClick: this.handleLikeClick
-        })
+        });
       }
     }
 
-    const countPagin = Math.ceil(data.count / 10)
+    const countPagin = Math.ceil(data.count / 10);
 
     const arrPag = [];
 
     for (let i = 0; i < countPagin; i++)
     {
-
       arrPag.push({
         index: i + 1,
         classPag: ("number" + ((this.state.pagination == i + 1) ? " active" : " "))
-      })
+      });
     }
 
     curData.push({
@@ -167,7 +147,7 @@ export default class MainPage extends React.Component
       data: arrPag,
       classPagination: "pagination-line",
       onClick: this.changePagination
-    })
+    });
     return curData
   }
 
@@ -180,27 +160,26 @@ export default class MainPage extends React.Component
 
     const likeArr = this.state.favorites;
 
-    data.favorite = !data.favorite
-
-    
+    data.favorite = !data.favorite;
 
     let index = likeArr.findIndex(item => item.id == data.id);
 
     index >= 0 ? likeArr.splice(index, 1) : likeArr.push({
       id: data.id
-    })
+    });
 
-    index = this.state.data.findIndex(item => item.id == data.id)
+    index = this.state.data.findIndex(item => item.id == data.id);
 
-    if (index >= 0) this.state.data[index].favorite = data.favorite
+    if (index >= 0) this.state.data[index].favorite = data.favorite;
 
-    localStorage.setItem("Favorites", JSON.stringify(likeArr))
+    localStorage.setItem("Favorites", JSON.stringify(likeArr));
 
     this.state.favorites = likeArr;
 
     this.state.renderData = await this.processingData({
-      results: this.state.data
-    })
+      results: this.state.data,
+      count: count
+    });
 
     this.forceUpdate();
   }
@@ -222,7 +201,7 @@ export default class MainPage extends React.Component
 
     if (!response)
     {
-      this.killComponent()
+      this.setViewMode(constants.view.none);
       return
     }
 
@@ -232,29 +211,14 @@ export default class MainPage extends React.Component
     {
       const strData = item.url.split("/");
       item.id = strData[strData.length - 2];
-      item.favorite = 0;
-
-      if (favorites.length)
-      {
-        favorites.forEach(elem =>
-        {
-          if (elem.id == item.id)
-          {
-            item.favorite = 1;
-          }
-        })
-      }
+      item.favorite = favorites.some(elem => elem.id == item.id);
     })
 
     this.state.data = response.data.results;
-
     this.state.count = response.data.count;
-
     this.state.renderData = await this.processingData(response.data);
 
-    this.state.view = constants.view.content;
-
-    this.forceUpdate();
+    this.setViewMode(constants.view.content);
   }
 
   onChangeInput = (value) => 
@@ -286,6 +250,9 @@ export default class MainPage extends React.Component
       favorites
     } = this.state;
 
+    this.state.view = constants.view.loader;
+
+    await this.forceUpdateSync();
 
     const url = constants.url + "?search=" + value;
 
@@ -295,7 +262,7 @@ export default class MainPage extends React.Component
 
     if (!response)
     {
-      this.killComponent();
+      this.setViewMode(constants.view.none);
 
       return
     }
@@ -304,28 +271,15 @@ export default class MainPage extends React.Component
     {
       const strData = item.url.split("/");
       item.id = strData[strData.length - 2];
-      item.favorite = 0;
-
-
-      if (favorites.length)
-      {
-        favorites.forEach(elem =>
-        {
-          if (elem.id == item.id)
-          {
-            item.favorite = 1;
-          }
-        })
-      }
+      item.favorite = favorites.some(elem => elem.id == item.id);
     })
 
     this.state.data = response.data.results;
 
     this.state.count = response.data.count;
-
     this.state.renderData = await this.processingData(response.data);
 
-    this.forceUpdate();
+    this.setViewMode(constants.view.content);
   }
 
 

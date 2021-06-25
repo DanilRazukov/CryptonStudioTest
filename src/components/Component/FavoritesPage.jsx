@@ -18,7 +18,6 @@ export default class FavoritesPage extends React.Component
       favorites: [],
       renderData: [],
       pagination: 1,
-      count: 0,
       view: constants.view.loader,
     }
   }
@@ -29,6 +28,12 @@ export default class FavoritesPage extends React.Component
     {
       this.forceUpdate(() => {resolve()});
     });
+  }
+
+  setViewMode = (mode) =>
+  {
+    this.state.view = mode;
+    this.forceUpdate();
   }
 
   getData = async (url) =>
@@ -46,9 +51,7 @@ export default class FavoritesPage extends React.Component
 
     this.state.renderData = await this.processingData(favorites);
 
-    this.state.view = constants.view.content;
-
-    this.forceUpdate();
+    this.setViewMode(constants.view.content);
   }
 
   processingData = async (data) =>
@@ -133,12 +136,12 @@ export default class FavoritesPage extends React.Component
     const {
       pagination
     } = this.state;
-    const id = data.id;
 
     this.state.view = constants.view.loader;
+    
     await this.forceUpdateSync();
 
-    const index = this.state.favorites.findIndex(item => item.id == id);
+    const index = this.state.favorites.findIndex(item => item.id == data.id);
 
     this.state.favorites.splice(index, 1);
 
@@ -146,8 +149,8 @@ export default class FavoritesPage extends React.Component
 
     const part = this.state.favorites.slice((pagination-1)*10, pagination * 10);
     this.state.renderData = await this.processingData(part);
-    this.state.view = constants.view.content;
-    this.forceUpdate();
+
+    this.setViewMode(constants.view.content);
   }
 
   changePagination = async (num) =>
@@ -155,11 +158,10 @@ export default class FavoritesPage extends React.Component
     this.state.view = constants.view.loader;
     await this.forceUpdate();
 
-    const part = this.state.favorites.slice((num - 1) * 10, num * 10)
+    const part = this.state.favorites.slice((num - 1) * 10, num * 10);
     this.state.pagination = num;
     this.state.renderData = await this.processingData(part);
-    this.state.view = constants.view.content;
-    this.forceUpdate();
+    this.setViewMode(constants.view.content);
   }
 
   render()
