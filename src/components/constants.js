@@ -10,4 +10,6 @@ export const delayIndex = {
   search: 1,
 }
 
-export const url = "https://swapi.dev/api/people/"
+export const url = "https://swapi.dev/api/people/";
+
+export const numberOfCharacters = 10;

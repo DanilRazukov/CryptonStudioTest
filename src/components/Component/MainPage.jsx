@@ -140,7 +140,7 @@ export default class MainPage extends React.Component
       }
     }
 
-    const countPagin = Math.ceil(data.count / 10);
+    const countPagin = Math.ceil(data.count / constants.numberOfCharacters);
 
     const arrPag = [];
 
@@ -170,13 +170,15 @@ export default class MainPage extends React.Component
 
     const likeArr = this.state.favorites;
 
+    const elem = this.state.renderData[ind].data
+
     const index = likeArr.findIndex(item => item.id == id);
 
     index >= 0 ? likeArr.splice(index, 1) : likeArr.push({
       id,
+      name: elem.name,
+      homeWorld: elem.homeWorld,
     });
-
-    const elem = this.state.renderData[ind].data
 
     this.state.renderData[ind].data.favorite = !elem.favorite
 
@@ -320,7 +322,6 @@ export default class MainPage extends React.Component
                   className={item.className}
                   classImg={item.classImg}
                   classPagination={item.classPagination}
-                  classButton={item.classButton}
                 />)}
             </>
             : view == constants.view.loader ?

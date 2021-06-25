@@ -49,12 +49,12 @@ export default class FavoritesPage extends React.Component
 
     this.state.favorites = favorites;
 
-    this.state.renderData = await this.processingData(favorites);
+    this.state.renderData = this.processingData(favorites);
 
     this.setViewMode(constants.view.content);
   }
 
-  processingData = async (data) =>
+  processingData = (data) =>
   {
     const curData = [];
 
@@ -69,18 +69,12 @@ export default class FavoritesPage extends React.Component
     {
       for (let i = 0; i < data.length; i++)
       {
-        const id = data[i].id;
 
-        const url = constants.url + id;
-
-        const response = await this.getData(url);
-
-        const homeWorld = await this.getData(response.data.homeworld);
+        const elem = data[i];
+        const id = elem.id;
 
         const item = {
-          id,
-          name: response.data.name,
-          homeWorld: homeWorld.data.name,
+          ...elem,
           favorite: 1,
           src: `https://starwars-visualguide.com/assets/img/characters/${id}.jpg`
         }
@@ -96,12 +90,12 @@ export default class FavoritesPage extends React.Component
           onClick: this.handleLikeClick
         })
 
-        if (i == 9) break
+        if (i == constants.numberOfCharacters - 1) break
       }
 
       const count = this.state.favorites.length;
 
-      const countPagin = Math.ceil(count / 10);
+      const countPagin = Math.ceil(count / constants.numberOfCharacters);
 
       const arrPag = [];
 
@@ -132,36 +126,38 @@ export default class FavoritesPage extends React.Component
     return curData
   }
 
-  handleLikeClick = async (id) => 
+  handleLikeClick =  async (id) => 
   {
     const {
       pagination
     } = this.state;
-    
-    this.state.view = constants.view.loader;
-    
-    await this.forceUpdateSync();
 
     const index = this.state.favorites.findIndex(item => item.id == id);
 
     this.state.favorites.splice(index, 1);
 
-    localStorage.setItem("Favorites",JSON.stringify(this.state.favorites));
 
-    const part = this.state.favorites.slice((pagination-1)*10, pagination * 10);
-    this.state.renderData = await this.processingData(part);
+    localStorage.setItem("Favorites", JSON.stringify(this.state.favorites));
 
-    this.setViewMode(constants.view.content);
+    if (Math.ceil(this.state.favorites.length / constants.numberOfCharacters) < pagination) this.state.pagination--
+
+    this.changePagination(this.state.pagination, 1)
   }
 
-  changePagination = async (num) =>
+  changePagination = async (num, isLike) =>
   {
-    this.state.view = constants.view.loader;
-    await this.forceUpdate();
+    if (!isLike)
+    {
+      this.state.view = constants.view.loader;
+      await this.forceUpdateSync();
+    }
 
-    const part = this.state.favorites.slice((num - 1) * 10, num * 10);
+    const firstPart = (num - 1) * constants.numberOfCharacters;
+    const secondPart = num * constants.numberOfCharacters;
+
+    const part = this.state.favorites.slice(firstPart, secondPart);
     this.state.pagination = num;
-    this.state.renderData = await this.processingData(part);
+    this.state.renderData = this.processingData(part);
     this.setViewMode(constants.view.content);
   }
 
@@ -180,6 +176,7 @@ export default class FavoritesPage extends React.Component
               {renderData.map((item, index) =>
                 <item.Component
                   key={index}
+                  index={index}
                   data={item.data}
                   onClick={item.onClick}
                   classButton={item.classButton}
@@ -188,7 +185,6 @@ export default class FavoritesPage extends React.Component
                   className={item.className}
                   classImg={item.classImg}
                   classPagination={item.classPagination}
-                  classButton={item.classButton}
                 />
               )}
             </>
